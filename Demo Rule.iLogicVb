@@ -1,0 +1,10 @@
+AddVbFile "C:\Autodesk\Git\iLogic-Tools\Viewrail Functions.vb"
+Option Explicit On
+Sub Main()
+	Dim startTime As DateTime = Now
+	If ParameterExists(ThisDoc.Document, "debug") AndAlso Parameter("debug") Then Logger.Debug("Starting: " & iLogicVb.RuleName & " (" & ThisDoc.FileName & ")")
+	
+	MessageBox.Show("Hello World!")
+	
+	If ParameterExists(ThisDoc.Document, "debug") AndAlso Parameter("debug") Then Logger.Debug("Finished: " & iLogicVb.RuleName & " (" & ThisDoc.FileName & ") [" & Round(Now().Subtract(startTime).TotalSeconds,1) & "s]")
+End Sub 'Main
