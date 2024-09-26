@@ -141,7 +141,8 @@ Public Module DocumentExtensions
 		
 
         ''' <summary>
-        ''' Copies Parameters from sourceDoc to targetDoc. Optional list of parameter (names) to skip and dictionary of differently names parameter to push
+        ''' Copies Parameter values from sourceDoc to targetDoc. It will only copy parameters that have identical names in both documents.
+	''' Optional list of parameter (names) to skip and dictionary of differently names parameter to push
         ''' </summary>
         ''' <param name="sourceDoc">Source Document Object</param>
         ''' <param name="targetDoc">Target Document Object</param>
