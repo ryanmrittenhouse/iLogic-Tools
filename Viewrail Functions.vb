@@ -76,6 +76,7 @@ Public Module DocumentExtensions
         ''' <summary>
         ''' Returns False if given component has an unconstrained sketch
         ''' </summary>
+	''' <param name="iLogicVb">iLogic Wrapper</param>
         ''' <param name="comp">Component Occurrence</param>
         ''' <returns>Boolean</returns>
         <Extension()>
@@ -101,7 +102,7 @@ Public Module DocumentExtensions
         ''' Returns True/False if a given Document has the given component name in the top level of the model
         ''' </summary>
         ''' <param name="doc">Document Object</param>
-        ''' <param name="paramName">Component Name</param>
+        ''' <param name="compName">Component Name</param>
         ''' <returns>Boolean</returns>
         <Extension()>
         Function ComponentExists(doc As Document, compName As String) As Boolean
@@ -610,6 +611,7 @@ Public Module DocumentExtensions
         ''' Returns True if all given assembly document has no broken constraints
         ''' </summary>
         ''' <param name="doc">Assembly Document</param>
+	''' <param name="iLogicVb">iLogic Wrapper</param>
         ''' <returns>Boolean</returns>
         <Extension()>
         Function HasBrokenConstraints(doc As Document, Optional iLogicVb As ILowLevelSupport = Nothing) As Boolean
@@ -724,8 +726,7 @@ Public Module DocumentExtensions
 		
         ''' <summary>
         ''' Calculates the relative position between two component occurrences along a specified axis.
-        ''' Measurement is the 2nd component relavtive to the 1st.
-        ''' Derek, make sure both components are in the same assembly
+        ''' Measurement is the 2nd component relative to the 1st.
         ''' </summary>
         ''' <param name="comp1">The first component occurrence.</param>
         ''' <param name="comp2">The second component occurrence.</param>
@@ -834,7 +835,7 @@ Public Module DocumentExtensions
         ''' </summary>
         ''' <param name="iLogicVb">iLogic Wrapper</param>
         ''' <param name="partName">Component Name</param>
-        ''' <param name="active">Suppression State</param>
+        ''' <param name="active">Desired Suppression State</param>
         <Extension()>
         Sub Unconstrain(iLogicVb As ILowLevelSupport, partName As String, Optional active As Boolean = True)
 	
