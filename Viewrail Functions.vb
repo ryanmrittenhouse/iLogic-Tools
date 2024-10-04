@@ -7,7 +7,6 @@ Imports Autodesk.iLogic.Runtime
 Public Module DocumentExtensions
 
         Private ThisApplication As Object = GetObject(, "Inventor.Application")
-        Private vaultApp As ApplicationAddIn = ThisApplication.ApplicationAddIns.ItemById("{48B682BC-42E6-4953-84C5-3D253B52E77B}")
 
         ''' <summary>
         ''' Activates given view (by name)
