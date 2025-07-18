@@ -1,3 +1,7 @@
+' This code was written by Viewrail and published on GitHub.
+' This code is provided "As Is" without warranty of any kind.
+' The author is not responsible for any damage or data loss caused by the use of this code.
+
 Imports System.Runtime.CompilerServices
 Imports Inventor
 Imports Autodesk.iLogic.Automation
@@ -267,6 +271,48 @@ Public Module DocumentExtensions
             Return entity
 
         End Function 'GetComponent
+
+
+        ' <summary>
+        ' Retrieves the definition of a given object.
+        ' </summary>
+        ' <param name="baseObject">The object for which the definition is to be retrieved.</param>
+        ' <returns>The definition of the base object other wise it returns Nothing.</returns>        
+        Function GetDefinition(baseObject As Object) As Object
+            
+            If baseObject Is Nothing Then Return Nothing
+            Dim returnDefinition As Object = Nothing
+            
+            Select Case TypeName(baseObject)
+                
+                Case "AssemblyComponentDefinition", "PartComponentDefinition", "SheetMetalComponentDefinition"
+                    returnDefinition = baseObject
+                                
+                Case "ComponentOccurrence", "ComponentOccurrenceProxy"
+                    returnDefinition = baseObject.Definition
+
+                Case "_DocumentClass", "AssemblyDocument", "PartDocument", "DrawingDocument", "_AssemblyDocumentClass", "_PartDocumentClass"
+                    If Not TypeOf(baseObject) Is DrawingDocument Then
+                        returnDefinition = baseObject.ComponentDefinition
+                    End If
+
+                Case "Face", "FaceProxy", "Edge", "EdgeProxy"
+                    returnDefinition = baseObject.Parent.Parent.Definition
+                    
+                Case "WorkPoint", "WorkPointProxy", "WorkAxis", "WorkAxisProxy", "WorkPlane", "WorkPlaneProxy"
+                    returnDefinition = baseObject.Parent
+                    
+                Case "CadDoc"
+                    returnDefinition = baseObject.Document.ComponentDefinition
+                    
+                Case Else
+                    Throw New Exception("Object type " & TypeName(baseObject) & " not accounted for in GetDefinition Function")
+                    
+            End Select
+                
+            Return returnDefinition
+
+        End Function 'GetDefinition
 		
 		
         ''' <summary>
@@ -364,11 +410,17 @@ Public Module DocumentExtensions
                 Case "CadDoc", "AssemblyComponentDefinition", "PartComponentDefinition"
                     returnDocument = baseObject.Document
                     
-                Case "_DocumentClass", "AssemblyDocument", "PartDocument", "DrawingDocument"
+                Case "_DocumentClass", "AssemblyDocument", "PartDocument", "DrawingDocument", "_AssemblyDocumentClass", "_PartDocumentClass"
                     returnDocument = baseObject
                     
                 Case "ComponentOccurrence", "ComponentOccurrenceProxy"
                     returnDocument = baseObject.Definition.Document
+
+                Case "Face", "FaceProxy", "Edge", "EdgeProxy"
+                    returnDocument = baseObject.Parent.Parent.Definition.Document
+                    
+                Case "WorkPoint", "WorkPointProxy", "WorkAxis", "WorkAxisProxy", "WorkPlane", "WorkPlaneProxy"
+                    returnDocument = baseObject.Parent.Document
                     
                 Case Else
                     Throw New Exception("Object type " & TypeName(baseObject) & " not accounted for in GetDocument Function")
@@ -496,6 +548,43 @@ Public Module DocumentExtensions
             Return entity
 
         End Function 'GetLeafComponent
+
+
+        ''' <summary>
+        ''' Retrieves the value of a specified parameter from a given object.
+        ''' </summary>
+        ''' <param name="obj">The object from which to retrieve the parameter value.</param>
+        ''' <param name="paramName">The name of the parameter whose value is to be retrieved.</param>
+        ''' <returns>
+        ''' The value of the specified parameter. If the parameter's units are inches ("in"), 
+        ''' the value is converted from centimeters. If the parameter's units are degrees ("deg"), 
+        ''' the value is converted from radians. Otherwise, the raw parameter value is returned.
+        ''' </returns>
+        Function GetParameterValue(obj As Object, paramName As String) As Object
+
+            Dim val As Object = Nothing
+            Dim def As ComponentDefinition = GetDefinition(obj)
+            If TypeOf def Is VirtualComponentDefinition Then Return Nothing
+            
+            If Not def Is Nothing AndAlso ParameterExists(obj, paramName) Then
+                Dim param As Parameter = def.Parameters(paramName)
+                
+                Select Case param.Units
+                    Case "in"
+                        val = param.Value / 2.54
+                        
+                    Case "deg"
+                        val = param.Value / (PI / 180)
+                        
+                    Case Else
+                        val = param.Value
+                        
+                End Select
+            End If
+            
+            Return val
+
+        End Function 'GetParameterValue
 
         
         ''' <summary>
@@ -770,6 +859,40 @@ Public Module DocumentExtensions
             ThisApplication.ActiveView.Fit
             
         End Sub 'SetHomeView
+
+
+        ''' <summary>
+        ''' Sets the value of a specified parameter for a given object.
+        ''' </summary>
+        ''' <param name="obj">The object containing the parameter.</param>
+        ''' <param name="paramName">The name of the parameter to set.</param>
+        ''' <param name="val">The value to set for the parameter.</param>
+        ''' <remarks>
+        ''' If the parameter's units are inches ("in"), the value is converted from inches to centimeters.
+        ''' If the parameter's units are degrees ("deg"), the value is converted from degrees to radians.
+        ''' Otherwise, the value is set directly.
+        ''' </remarks>
+        Sub SetParameterValue(obj As Object, paramName As String, val As Object)
+
+            Dim def As ComponentDefinition = GetDefinition(obj)
+            
+            If Not def Is Nothing AndAlso ParameterExists(obj, paramName) Then
+                Dim param As UserParameter = def.Parameters(paramName)
+                
+                Select Case param.Units
+                    Case "in"
+                        param.Value = val * 2.54
+                        
+                    Case "deg"
+                        param.Value = val * PI / 180
+                        
+                    Case Else
+                        param.Value = val
+                        
+                End Select
+            End If
+
+        End Sub 'SetParameterValue
 
 
         ''' <summary>
