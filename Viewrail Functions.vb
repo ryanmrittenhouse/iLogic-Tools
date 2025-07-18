@@ -11,10 +11,9 @@ Imports Autodesk.iLogic.Runtime
 Public Module DocumentExtensions
 
         Private ThisApplication As Object = GetObject(, "Inventor.Application")
-        Private vaultApp As ApplicationAddIn = ThisApplication.ApplicationAddIns.ItemById("{48B682BC-42E6-4953-84C5-3D253B52E77B}")
 
         ''' <summary>
-        ''' Activates give view
+        ''' Activates given view (by name)
         ''' </summary>
         ''' <param name="doc">Assembly Document</param>
         ''' <param name="viewName">View Name</param>
@@ -80,6 +79,7 @@ Public Module DocumentExtensions
         ''' <summary>
         ''' Returns False if given component has an unconstrained sketch
         ''' </summary>
+	''' <param name="iLogicVb">iLogic Wrapper</param>
         ''' <param name="comp">Component Occurrence</param>
         ''' <returns>Boolean</returns>
         <Extension()>
@@ -102,13 +102,13 @@ Public Module DocumentExtensions
 
 
         ''' <summary>
-        ''' Given Document Object and Component Name returns True/False if component exists in Document
+        ''' Returns True/False if a given Document has the given component name in the top level of the model
         ''' </summary>
         ''' <param name="doc">Document Object</param>
-        ''' <param name="paramName">Component Name</param>
+        ''' <param name="compName">Component Name</param>
         ''' <returns>Boolean</returns>
         <Extension()>
-        Public Function ComponentExists(doc As Document, compName As String) As Boolean
+        Function ComponentExists(doc As Document, compName As String) As Boolean
 
             For Each comp As ComponentOccurrence In doc.ComponentDefinition.Occurrences
                 If comp.Name = compName Then Return True
@@ -145,7 +145,8 @@ Public Module DocumentExtensions
 		
 
         ''' <summary>
-        ''' Copies Parameters from sourceDoc to targetDoc. Optional list of parameter (names) to skip and dictionary of differently names parameter to push
+        ''' Copies Parameter values from sourceDoc to targetDoc. It will only copy parameters that have identical names in both documents.
+	''' Optional list of parameter (names) to skip and dictionary of differently names parameter to push
         ''' </summary>
         ''' <param name="sourceDoc">Source Document Object</param>
         ''' <param name="targetDoc">Target Document Object</param>
@@ -219,7 +220,7 @@ Public Module DocumentExtensions
 		
 
         ''' <summary>
-        ''' Given Component Occurrence and Feature Name returns True/False if Feature exists in Document
+        ''' Given a Part Document and Feature Name returns True/False if Feature exists in Document
         ''' </summary>
         ''' <param name="doc">Part Document</param>
         ''' <param name="featureName">Feature Name</param>
@@ -480,7 +481,7 @@ Public Module DocumentExtensions
         ''' <param name="faceName">Face Name</param>
         ''' <returns>FaceProxy</returns>
         <Extension()>
-        Public Function GetFaceProxy(comp As ComponentOccurrence, faceName As String) As FaceProxy
+        Function GetFaceProxy(comp As ComponentOccurrence, faceName As String) As FaceProxy
             
             For Each bod As SurfaceBody In comp.SurfaceBodies
                 For Each faceProx As FaceProxy In bod.Faces
@@ -504,13 +505,13 @@ Public Module DocumentExtensions
 
 
         ''' <summary>
-        ''' Given component occurrence and face name, returns face proxy if it exists
+        ''' Given component occurrence proxy and face name, returns face proxy if it exists
         ''' </summary>
-        ''' <param name="comp">Component Occurrence</param>
+        ''' <param name="comp">Component Occurrence Proxy</param>
         ''' <param name="faceName">Face Name</param>
         ''' <returns>FaceProxy</returns>
         <Extension()>
-        Public Function GetFaceProxy(comp As ComponentOccurrenceProxy, faceName As String) As FaceProxy
+        Function GetFaceProxy(comp As ComponentOccurrenceProxy, faceName As String) As FaceProxy
             
             Return GetFaceProxy(CType(comp, ComponentOccurrence), faceName)
             
@@ -537,7 +538,7 @@ Public Module DocumentExtensions
 
 
         ''' <summary>
-        ''' Returns Leaf Occurrence of selected object.
+        ''' Returns a selected leaf occurrence
         ''' </summary>
         ''' <param name="prompt">Prompt for object to select</param>
         ''' <returns>ComponentOccurrence</returns>
@@ -593,7 +594,7 @@ Public Module DocumentExtensions
         ''' <param name="comp">ComponentOccurrence</param>
         ''' <returns>String</returns>
         <Extension()>
-        Public Function GetPartNumber(comp As ComponentOccurrence) As String
+        Function GetPartNumber(comp As ComponentOccurrence) As String
 
             Dim partNumber As String = Nothing
 
@@ -609,7 +610,7 @@ Public Module DocumentExtensions
 
 
         ''' <summary>
-        ''' Returns a top level proxy of the given thing in the given component occurrence
+        ''' Returns a top level proxy of the given object in the given component occurrence
         ''' </summary>
         ''' <param name="comp">Component Occurrence</param>
         ''' <param name="thing">Object to create proxy from</param>
@@ -634,7 +635,7 @@ Public Module DocumentExtensions
 
 
         ''' <summary>
-        ''' Returns a SurfaceBody based upon a user selected component.
+        ''' Returns a SurfaceBody based on a user selected face/edge.
         ''' </summary>
         ''' <param name="prompt">Selection Prompt</param>
         ''' <param name="name"></param>
@@ -698,6 +699,7 @@ Public Module DocumentExtensions
         ''' Returns True if all given assembly document has no broken constraints
         ''' </summary>
         ''' <param name="doc">Assembly Document</param>
+	''' <param name="iLogicVb">iLogic Wrapper</param>
         ''' <returns>Boolean</returns>
         <Extension()>
         Function HasBrokenConstraints(doc As Document, Optional iLogicVb As ILowLevelSupport = Nothing) As Boolean
@@ -767,13 +769,13 @@ Public Module DocumentExtensions
 
 
         ''' <summary>
-        ''' Given Document Object and Parameter names returns True if parameter exists in Document
+        ''' Given Document and Parameter name, returns True if parameter exists in Document
         ''' </summary>
         ''' <param name="doc">Document Object</param>
         ''' <param name="paramName">Parameter Name</param>
         ''' <returns></returns>
         <Extension()>
-        Public Function ParameterExists(doc As Document, paramName As String) As Boolean
+        Function ParameterExists(doc As Document, paramName As String) As Boolean
 
             Dim params As Parameters
             If doc.DocumentType = Inventor.DocumentTypeEnum.kDrawingDocumentObject Then
@@ -792,14 +794,14 @@ Public Module DocumentExtensions
 
 
         ''' <summary>
-        ''' Given Document Object and Pattern name returns True/False if pattern exists in Document
+        ''' Given Document and Pattern name, returns True/False if pattern exists in Document
         ''' </summary>
         ''' <param name="doc">Document Object</param>
         ''' <param name="patternName">Pattern Name</param>
         ''' <returns></returns>
         ''' <remarks>Do not use in Drawing Documents</remarks>
         <Extension()>
-        Public Function PatternExists(doc As Document, patternName As String) As Boolean
+        Function PatternExists(doc As Document, patternName As String) As Boolean
         
             For Each p As OccurrencePattern In doc.ComponentDefinition.OccurrencePatterns
                 If p.Name = patternName Then Return True
@@ -812,8 +814,7 @@ Public Module DocumentExtensions
 		
         ''' <summary>
         ''' Calculates the relative position between two component occurrences along a specified axis.
-        ''' Measurement is the 2nd component relavtive to the 1st.
-        ''' Derek, make sure both components are in the same assembly
+        ''' Measurement is the 2nd component relative to the 1st.
         ''' </summary>
         ''' <param name="comp1">The first component occurrence.</param>
         ''' <param name="comp2">The second component occurrence.</param>
@@ -956,7 +957,7 @@ Public Module DocumentExtensions
         ''' </summary>
         ''' <param name="iLogicVb">iLogic Wrapper</param>
         ''' <param name="partName">Component Name</param>
-        ''' <param name="active">Suppression State</param>
+        ''' <param name="active">Desired Suppression State</param>
         <Extension()>
         Sub Unconstrain(iLogicVb As ILowLevelSupport, partName As String, Optional active As Boolean = True)
 	
@@ -985,7 +986,7 @@ Public Module DocumentExtensions
         ''' <param name="doc">Document</param>
         ''' <param name="wpName">String</param>
         ''' <returns>Boolean</returns>
-        Public Function WorkPlaneExists(doc As Document, wpName As String) As Boolean
+        Function WorkPlaneExists(doc As Document, wpName As String) As Boolean
 
             For Each wp As WorkPlane In doc.ComponentDefinition.WorkPlanes
                 If wp.Name = wpName Then Return True
@@ -997,7 +998,7 @@ Public Module DocumentExtensions
 
 
         ''' <summary>
-        ''' Writes the given data to the specified file name.
+        ''' Writes the given string to the specified file name.
         ''' The file is created if it does not exist and will be overwritten if it does exist.
         ''' </summary>
         ''' <param name="fileName">String</param>
